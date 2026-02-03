@@ -1,3 +1,7 @@
+> [!CAUTION]
+> This project is the result of late night tinkering. 
+> I hope it fuels your own nocturnal coding, but consume with caution!
+
 # dxauth0
 
 A comprehensive authentication library for Dioxus fullstack applications using Auth0.
