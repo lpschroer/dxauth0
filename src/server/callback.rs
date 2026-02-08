@@ -209,16 +209,22 @@ async fn exchange_code_for_tokens(
         .as_ref()
         .ok_or_else(|| CallbackError::MissingConfig("client_secret not configured".to_string()))?;
 
+    let redirect_uri = format!("{}/callback", get_base_url());
+    let form_params = [
+        ("grant_type", "authorization_code"),
+        ("client_id", client_id.as_str()),
+        ("client_secret", client_secret.as_str()),
+        ("code", code),
+        ("redirect_uri", redirect_uri.as_str()),
+    ];
+    let form_body = serde_urlencoded::to_string(form_params)
+        .map_err(|e| CallbackError::RequestFailed(format!("Failed to encode form: {}", e)))?;
+
     let client = reqwest::Client::new();
     let response = client
         .post(config.token_url())
-        .form(&[
-            ("grant_type", "authorization_code"),
-            ("client_id", client_id.as_str()),
-            ("client_secret", client_secret.as_str()),
-            ("code", code),
-            ("redirect_uri", &format!("{}/callback", get_base_url())),
-        ])
+        .header("Content-Type", "application/x-www-form-urlencoded")
+        .body(form_body)
         .send()
         .await
         .map_err(|e| CallbackError::RequestFailed(e.to_string()))?;

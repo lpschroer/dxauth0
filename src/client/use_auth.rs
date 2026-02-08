@@ -712,22 +712,28 @@ async fn exchange_code_for_tokens(
             .ok_or_else(|| "Failed to get window origin".to_string())?
             + "/callback";
 
+        let form_params = [
+            ("grant_type", "authorization_code"),
+            (
+                "client_id",
+                config
+                    .client_id
+                    .as_ref()
+                    .expect("Client config must have client_id")
+                    .as_str(),
+            ),
+            ("code", code),
+            ("code_verifier", code_verifier.as_str()),
+            ("redirect_uri", redirect_uri.as_str()),
+        ];
+        let form_body = serde_urlencoded::to_string(&form_params)
+            .map_err(|e| format!("Failed to encode form: {}", e))?;
+
         let client = reqwest::Client::new();
         let response = client
             .post(config.token_url())
-            .form(&[
-                ("grant_type", "authorization_code"),
-                (
-                    "client_id",
-                    config
-                        .client_id
-                        .as_ref()
-                        .expect("Client config must have client_id"),
-                ),
-                ("code", code),
-                ("code_verifier", &code_verifier),
-                ("redirect_uri", &redirect_uri),
-            ])
+            .header("Content-Type", "application/x-www-form-urlencoded")
+            .body(form_body)
             .send()
             .await
             .map_err(|e| format!("Token request failed: {}", e))?;

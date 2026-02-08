@@ -5,6 +5,7 @@
 
 use base64::Engine;
 use base64::engine::general_purpose::URL_SAFE_NO_PAD;
+use rand::RngExt;
 use sha2::{Digest, Sha256};
 
 /// Length of the code verifier in bytes (43-128 characters recommended by RFC 7636)
@@ -15,11 +16,9 @@ const CODE_VERIFIER_LENGTH: usize = 32;
 /// The code verifier is a high-entropy cryptographic random string using the
 /// unreserved characters [A-Z] / [a-z] / [0-9] / "-" / "." / "_" / "~".
 pub fn generate_code_verifier() -> String {
-    use rand::Rng;
-
-    let random_bytes: Vec<u8> = rand::thread_rng()
-        .sample_iter(rand::distributions::Standard)
-        .take(CODE_VERIFIER_LENGTH)
+    let mut rng = rand::rng();
+    let random_bytes: Vec<u8> = (0..CODE_VERIFIER_LENGTH)
+        .map(|_| rng.random::<u8>())
         .collect();
 
     URL_SAFE_NO_PAD.encode(&random_bytes)
@@ -62,12 +61,8 @@ pub fn build_authorization_url(
 
 /// Generates a random state parameter for CSRF protection.
 pub fn generate_state() -> String {
-    use rand::Rng;
-
-    let random_bytes: Vec<u8> = rand::thread_rng()
-        .sample_iter(rand::distributions::Standard)
-        .take(16)
-        .collect();
+    let mut rng = rand::rng();
+    let random_bytes: Vec<u8> = (0..16).map(|_| rng.random::<u8>()).collect();
 
     URL_SAFE_NO_PAD.encode(&random_bytes)
 }
