@@ -33,7 +33,7 @@ getrandom = { version = "0.4.1", features = ["wasm_js"], optional = true }
 axum = { version = "0.8.8", optional = true }
 axum-cookie = { version = "0.2.4", optional = true }
 cookie-rs = { version = "0.4", optional = true }
-jsonwebtoken = { version = "10.3", optional = true }
+jsonwebtoken = { version = "10.3", features = ["aws_lc_rs"], optional = true }
 tokio = { version = "1.0", features = ["macros", "rt-multi-thread", "time"], optional = true }
 thiserror = { version = "2.0.18", optional = true }
 
